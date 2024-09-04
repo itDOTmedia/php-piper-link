@@ -1,0 +1,5 @@
+.vscode/
+.vscode/settings.json
+docs/next.md
+composer.lock
+vendor/

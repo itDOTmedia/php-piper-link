@@ -1,0 +1,22 @@
+{
+    "name": "idm/php-piper-link",
+    "description": "Add support for the piper API to your project.",
+    "type": "library",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Idm\\PiperLink\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "itDOTmedia",
+            "email": "p.grundmann@itdotmedia.de"
+        }
+    ],
+    "minimum-stability": "dev",    
+    "require": {
+        "pyther/ioc": ">=0.1.1",
+        "pyther/json": ">=0.2.2"
+    }
+}
