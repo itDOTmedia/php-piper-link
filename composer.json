@@ -1,5 +1,5 @@
 {
-    "name": "idm/php-piper-link",
+    "name": "itdotmedia/php-piper-link",
     "description": "Add support for the piper API to your project.",
     "type": "library",
     "license": "proprietary",
