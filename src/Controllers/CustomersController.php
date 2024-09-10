@@ -36,7 +36,7 @@ class CustomersController extends BaseController
             $this->POST_bulk();
         }
         else if ($this->IsRoute("POST", "customers", $path)) {
-            $this->POST();            
+            $this->POST();
         }
         // PUT
         else if ($this->IsRoute("PUT", "customers/{id}", $path)) {
@@ -52,7 +52,7 @@ class CustomersController extends BaseController
             $this->GET_byId($id);
         }
         else if ($this->IsRoute("GET", "customers", $path)) {
-            $this->GET_bulk();              
+            $this->GET_bulk();
         } 
         // DELETE
         else if ($this->IsRoute("DELETE", "customers/{id}", $path)) {
@@ -76,7 +76,7 @@ class CustomersController extends BaseController
         $instance = Ioc::get(ICustomersBulkCreateable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;
+
         $customers = Json::deserializeArrayOf($json, Customer::class, Utils::$Json);
         foreach ($instance->createCustomers($customers, []) as $item) {
             if (is_string($item)) {
@@ -84,16 +84,17 @@ class CustomersController extends BaseController
                 $item = new Customer();
                 $item->operation = Operation::Error;
                 $item->error = $error;
-                if ($statusCode == 200) {
-                    $statusCode = 400;
-                } else if ($statusCode == 400) {
-                    $statusCode = 207;
-                }
             } else {
                 $item->operation = Operation::Insert;
             }
             $result[] = $item;
         }
+
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Insert; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Insert; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }
 
@@ -102,30 +103,26 @@ class CustomersController extends BaseController
         /** @var ICustomersBulkUpdatable */
         $instance = Ioc::get(ICustomersBulkUpdatable::class);
         $result = [];
-        $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;        
+        $json = $this->getRequest()->getRawPayload();   
         $customers = Json::deserializeArrayOf($json, Customer::class, Utils::$Json);
         foreach ($instance->updateCustomers($customers, []) as $item) {
             if (is_string($item)) {
                 $error = $item;
                 $item = new Customer();
+                $item->id = $customers[count($result)]->id;
                 $item->operation = Operation::Error;
                 $item->error = $error == "404" ? "Resource not found!" : $error;
-                if ($statusCode == 200) {
-                    $statusCode = $error == "404" ? 404 : 400;
-                } else if ($statusCode == 404 && $error == "404") {
-                    $statusCode = 404;
-                } else if ($statusCode != 200) {
-                    $statusCode = 207;
-                }
             } else {
                 $item->operation = Operation::Update;
-                if ($statusCode >= 400) {
-                    $statusCode = 207;
-                }
-            }            
+            }           
             $result[] = $item;
-        }          
+        }
+        
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Update; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Update; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }    
 
@@ -155,56 +152,12 @@ class CustomersController extends BaseController
         }        
     }
 
-    /*
     function DELETE_bulk()
     {
-        $ids = $this->getRequest()->GET("ids") ?? throw new \Exception("No ids given!");
-        $ids = explode(',', $ids);
-
-        // @var ICustomersBulkDeletable 
-        $instance = Ioc::get(ICustomersBulkDeletable::class);
-        $customers = iterator_to_array($instance->deleteCustomers($ids));
-        
-        $countFailed = 0;
-        for ($i = 0; $i < count($customers); $i++){
-            $item = $customers[$i];
-            if (!is_string($item)) {
-                $item->operation = Operation::Delete;
-            } else {
-                $error = $item;
-                $item = new Customer();
-                $item->operation = Operation::Error;
-                $item->error = $error == "404" ? "Resource not found!" : $error;
-                $customers[$i] = $item;
-                $countFailed++;
-            }
-        }
-        
-        if ($countFailed > 0 && $countFailed < count($customers)) {
-            $this->getResponse()->setData(Json::serialize($customers, Utils::$JsonMinimal), 207);
-        } else if ($countFailed > 0) {
-            throw new NotFoundException();
-        } else {
-            $this->getResponse()->setData(Json::serialize($customers, Utils::$JsonMinimal), 200);
-        }
-    }
-    */
-
-
-    function DELETE_bulk()
-    {
-        /*
-        $ids = $this->getRequest()->GET("ids") ?? throw new \Exception("No ids given!");
-        $ids = explode(',', $ids);
-        $instance = Ioc::get(ICustomersBulkDeletable::class);
-        $customers = iterator_to_array($instance->deleteCustomers($ids));
-        */
-
         /** @var ICustomersBulkDeletable */
         $instance = Ioc::get(ICustomersBulkDeletable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;
         $customers = Json::deserializeArrayOf($json, Customer::class, Utils::$Json);
         $customers = $this->resolveCustomers($customers);
         $ids = array_map(function($customer) { return $customer->id;}, $customers);
@@ -215,21 +168,18 @@ class CustomersController extends BaseController
                 $item = new Customer();
                 $item->operation = Operation::Error;
                 $item->error = $error == "404" ? "Resource not found!" : $error;
-                if ($statusCode == 200) {
-                    $statusCode = $error == "404" ? 404 : 400;
-                } else if ($statusCode == 404 && $error == "404") {
-                    $statusCode = 404;
-                } else if ($statusCode != 200) {
-                    $statusCode = 207;
-                }
+                $item->id = $ids[count($result)] ?? null;
             } else {
                 $item->operation = Operation::Delete;
-                if ($statusCode >= 400) {
-                    $statusCode = 207;
-                }
             }            
             $result[] = $item;
-        }          
+        }
+
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Delete; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Delete; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, Utils::$JsonMinimal), $statusCode);
     }
 

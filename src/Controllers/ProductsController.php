@@ -77,7 +77,7 @@ class ProductsController extends BaseController
         $instance = Ioc::get(IProductsBulkCreateable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;
+
         $products = Json::deserializeArrayOf($json, Product::class, Utils::$Json);
         foreach ($instance->createProducts($products, []) as $item) {
             if (is_string($item)) {
@@ -85,16 +85,17 @@ class ProductsController extends BaseController
                 $item = new Product();
                 $item->operation = Operation::Error;
                 $item->error = $error;
-                if ($statusCode == 200) {
-                    $statusCode = 400;
-                } else if ($statusCode == 400) {
-                    $statusCode = 207;
-                }
             } else {
                 $item->operation = Operation::Insert;
             }
             $result[] = $item;
         }
+
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Insert; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Insert; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }
 
@@ -104,7 +105,6 @@ class ProductsController extends BaseController
         $instance = Ioc::get(IProductsBulkUpdatable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;
         $products = Json::deserializeArrayOf($json, Product::class, Utils::$Json);
         $products = $this->resolveProducts($products);
 
@@ -114,21 +114,18 @@ class ProductsController extends BaseController
                 $item = new Product();
                 $item->operation = Operation::Error;
                 $item->error = $error == "404" ? "Resource not found!" : $error;
-                if ($statusCode == 200) {
-                    $statusCode = $error == "404" ? 404 : 400;
-                } else if ($statusCode == 404 && $error == "404") {
-                    $statusCode = 404;
-                } else if ($statusCode != 200) {
-                    $statusCode = 207;
-                }
+                $item->id = $products[count($result)]->id;
             } else {
                 $item->operation = Operation::Update;
-                if ($statusCode >= 400) {
-                    $statusCode = 207;
-                }
             }            
             $result[] = $item;
-        }          
+        }
+
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Update; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Update; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }  
 
@@ -158,47 +155,13 @@ class ProductsController extends BaseController
         }        
     }
 
-    /*
-    function DELETE_bulk()
-    {
-        $ids = $this->getRequest()->GET("ids") ?? throw new \Exception("No ids given!");
-        $ids = explode(',', $ids);
-
-         @var IProductsBulkDeletable 
-        $instance = Ioc::get(IProductsBulkDeletable::class);
-        $products = iterator_to_array($instance->deleteProducts($ids));
-        
-        $countFailed = 0;
-        for ($i = 0; $i < count($products); $i++){
-            $item = $products[$i];
-            if (!is_string($item)) {
-                $item->operation = Operation::Delete;
-            } else {
-                $error = $item;
-                $item = new Product();
-                $item->operation = Operation::Error;
-                $item->error = $error == "404" ? "Resource not found!" : $error;
-                $products[$i] = $item;
-                $countFailed++;
-            }
-        }
-        
-        if ($countFailed > 0 && $countFailed < count($products)) {
-            $this->getResponse()->setData(Json::serialize($products, Utils::$JsonMinimal), 207);
-        } else if ($countFailed > 0) {
-            throw new NotFoundException();
-        } else {
-            $this->getResponse()->setData(Json::serialize($products, Utils::$JsonMinimal), 200);
-        }
-    }*/
-
     function DELETE_bulk()
     {
         /** @var IProductsBulkDeletable */
         $instance = Ioc::get(IProductsBulkDeletable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
-        $statusCode = 200;
+
         $products = Json::deserializeArrayOf($json, Product::class, Utils::$Json);
         $products = $this->resolveProducts($products);
 
@@ -210,21 +173,18 @@ class ProductsController extends BaseController
                 $item = new Product();
                 $item->operation = Operation::Error;
                 $item->error = $error == "404" ? "Resource not found!" : $error;
-                if ($statusCode == 200) {
-                    $statusCode = $error == "404" ? 404 : 400;
-                } else if ($statusCode == 404 && $error == "404") {
-                    $statusCode = 404;
-                } else if ($statusCode != 200) {
-                    $statusCode = 207;
-                }
+                $item->id = $ids[count($result)] ?? null;
             } else {
                 $item->operation = Operation::Delete;
-                if ($statusCode >= 400) {
-                    $statusCode = 207;
-                }
             }            
             $result[] = $item;
-        }          
+        }
+
+        $statusCode = 207;
+        if (Utils::all($result, function($e) { return $e->operation === Operation::Delete; })) $statusCode = 200;
+        else if (Utils::all($result, function($e) { return $e->error === "Resource not found!"; })) $statusCode = 404;
+        else if (Utils::all($result, function($e) { return $e->operation !== Operation::Delete; })) $statusCode = 400;
+
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }
 

@@ -93,7 +93,7 @@ class Document extends BaseModel
     
         /**
          * list of notes.
-         * @var Idm\PiperLink\Models\note[]
+         * @var Idm\PiperLink\Models\Note[]
          */
         public ?array $notes = null;
     
@@ -124,7 +124,7 @@ class Document extends BaseModel
     
         #endregion
 
-        public ?Operation $operation;
+        public ?Operation $operation = null;
 
         public ?string $error = null;
     
