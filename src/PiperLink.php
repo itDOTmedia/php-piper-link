@@ -19,31 +19,45 @@ class PiperLink
 
     function __construct(string $configPath)
     {
-        $configurations = new Configurations($configPath);
+        $this->configurations = new Configurations($configPath);
 
         // [Ioc]
-        Ioc::bindSingleton(Configurations::class, $configurations);
+        Ioc::bindSingleton(Configurations::class, $this->configurations);
         Ioc::bindSingleton(TokenRepository::class, [TokenRepository::class, "newInstance"]);
 
-        $this->router = new Router((string)$configurations->get("router.path"));
+        $this->router = new Router((string)$this->configurations->get("router.path"));
         $this->response = new Response();
     }
 
-    public function getRequest() {
+    public function getRequest(): Request {
         return $this->request;
     }
 
-    public function getResponse() {
+    public function getResponse(): Response {
         return $this->response;
+    }
+
+    public function getRouter(): Router {
+        return $this->router;
+    }
+
+    public function getConfigurations(): Configurations {
+        return $this->configurations;
+    }
+
+    public function getConfiguration(string $key) {
+        return $this->configurations->get($key);
     }
 
     /**
      * Handle PiperLink Api Routing
-     * @param string $path The current path
+     * @param string $path The requested url path relative to project home url.
      * @return boolean Returns true, if the route was a PiperLink route, false otherwise.
      */
-    public function route(?string $path) : bool {
-        $path = $path !== null ? ltrim($path, "/") : null;
+    public function route(?string $path = null) : bool {
+        $path ??= strtok($_SERVER["REQUEST_URI"], '?');
+        $path = ltrim($path, "/");
+
         if ($path == null || !str_starts_with($path, $this->router->root)) {
             return false;
         }

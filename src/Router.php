@@ -11,6 +11,10 @@ class Router {
         $this->root = $root ?? "";
     }
 
+    function getRoot() :string {
+        return $this->root;
+    }
+
     function route($path, PiperLink $piperLink) {
         $path = str_replace("\\", "/", $path);
         if (!str_starts_with($path, $this->root)) {
