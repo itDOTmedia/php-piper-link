@@ -36,7 +36,7 @@ class Configurations
     }
 
 
-    public function get(string $path) {
+    public function get(string $path): mixed {
         $ptr = &$this->data;
         foreach (StringX::each($path, '.') as $p) {
             if (isset($ptr[$p])) {

@@ -19,33 +19,58 @@ class PiperLink
 
     function __construct(string $configPath)
     {
+        // we cache the configuration object for performance.
         $this->configurations = new Configurations($configPath);
-
-        // [Ioc]
         Ioc::bindSingleton(Configurations::class, $this->configurations);
+
         Ioc::bindSingleton(TokenRepository::class, [TokenRepository::class, "newInstance"]);
 
         $this->router = new Router((string)$this->configurations->get("router.path"));
+        Ioc::bindSingleton(Router::class, $this->router);
+
         $this->response = new Response();
+        Ioc::bindSingleton(Response::class, $this->response);
     }
 
+    /**
+     * Returns the http request instance.
+     *
+     * @return Request
+     */
     public function getRequest(): Request {
         return $this->request;
     }
 
+    /**
+     * Returns the http response instance.
+     * @return Response
+     */
     public function getResponse(): Response {
         return $this->response;
     }
 
+    /**
+     * Returns the http router instance.
+     * @return Router
+     */
     public function getRouter(): Router {
         return $this->router;
     }
 
+    /**
+     * Returns the Configuration instance.
+     * @return Configurations
+     */
     public function getConfigurations(): Configurations {
         return $this->configurations;
     }
 
-    public function getConfiguration(string $key) {
+    /**
+     * Get a configuration value.
+     * @param string $key The configuration key.
+     * @return mixed The return value can be any atomar type, an array or null if the configuration wasn't found.
+     */
+    public function getConfiguration(string $key): mixed {
         return $this->configurations->get($key);
     }
 
