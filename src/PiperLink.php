@@ -37,8 +37,14 @@ class PiperLink
         return $this->response;
     }
 
-    public function route(string $path) : bool {
-        if (!str_starts_with($path, $this->router->root)) {
+    /**
+     * Handle PiperLink Api Routing
+     * @param string $path The current path
+     * @return boolean Returns true, if the route was a PiperLink route, false otherwise.
+     */
+    public function route(?string $path) : bool {
+        $path = $path !== null ? ltrim($path, "/") : null;
+        if ($path == null || !str_starts_with($path, $this->router->root)) {
             return false;
         }
         try {
@@ -47,13 +53,8 @@ class PiperLink
         } catch (AuthenticationException $ex) {
             $this->response->addHeader("WWW-Authenticate", $ex->buildAuthenticateHeader());
             $this->response->setData(null, 401);
-        } catch (AuthenticationException $ex) {
-            $this->response->addHeader("WWW-Authenticate", $ex->buildAuthenticateHeader());
-            $this->response->setData(null, 401);
         } catch (AccessDeniedException) {
             $this->response->setData(null, 403);
-        } catch (NotImplementedException $ex) {
-            $this->response->setData(!empty($ex->getMessage()) ? ["message" => $ex->getMessage()] : null, 501, "JSON");
         } catch (NotImplementedException $ex) {
             $this->response->setData(!empty($ex->getMessage()) ? ["message" => $ex->getMessage()] : null, 501, "JSON");
         } catch (NotFoundException) {
