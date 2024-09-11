@@ -63,4 +63,15 @@ class PiperLink
         }
         return true;
     }
+
+    public function bindMultiple(string $name, string|callable|null $implementation, array $args = []): PiperLink {
+        Ioc::bindMultiple($name, $implementation, $args);
+        return $this;
+    }
+
+    public function bindSingleton(string $name, string|callable|null|object $implementation, array $args = []): PiperLink {
+        Ioc::bindSingleton($name, $implementation, $args);
+        return $this;
+    }
+
 }
