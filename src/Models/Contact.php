@@ -176,7 +176,7 @@ class Contact extends BaseModel
      * @return string|null
      */
     public function getName(): ?string {
-        return !StringX::isNullOrWhiteSpace($this->firstName) ? $this->firstName + " " + $this->lastName : $this->lastName;
+        return !StringX::isNullOrWhiteSpace($this->firstName) ? ($this->firstName . " " . $this->lastName) : $this->lastName;
     }
 
     /**
