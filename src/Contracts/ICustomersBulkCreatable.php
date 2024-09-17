@@ -3,7 +3,7 @@ namespace Idm\PiperLink\Contracts;
 
 use Idm\PiperLink\Models\Customer;
 
-interface ICustomersBulkCreateable
+interface ICustomersBulkCreatable
 {
     /**
      * Create a bulk of new customers.

@@ -3,7 +3,7 @@ namespace Idm\PiperLink\Contracts;
 
 use Idm\PiperLink\Models\Document;
 
-interface IDocumentsBulkCreateable
+interface IDocumentsBulkCreatable
 {
     /**
      * Create a bulk of new documents.

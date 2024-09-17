@@ -1,7 +1,7 @@
 <?php
 namespace Idm\PiperLink\Controllers;
 
-use Idm\PiperLink\Contracts\ICustomersBulkCreateable;
+use Idm\PiperLink\Contracts\ICustomersBulkCreatable;
 use Idm\PiperLink\Contracts\ICustomersBulkDeletable;
 use Idm\PiperLink\Contracts\ICustomersBulkFetchable;
 use Idm\PiperLink\Contracts\ICustomersBulkResolvable;
@@ -63,17 +63,16 @@ class CustomersController extends BaseController
             $this->DELETE_bulk();
         }
         // other
-        else {
+        else
             throw new NotFoundException();
-        }        
     }
 
     #region bulk routes
 
     function POST_bulk()
     {
-        /** @var ICustomersBulkCreateable */
-        $instance = Ioc::get(ICustomersBulkCreateable::class);
+        /** @var ICustomersBulkCreatable */
+        $instance = Ioc::get(ICustomersBulkCreatable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
 
@@ -183,7 +182,6 @@ class CustomersController extends BaseController
         $this->getResponse()->setData(Json::serialize($result, Utils::$JsonMinimal), $statusCode);
     }
 
-
     #endregion
 
     #region single routes (untested!!!)
@@ -207,7 +205,6 @@ class CustomersController extends BaseController
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }
 
-
     function PUT_byId()
     {
         $instance = Ioc::get(ICustomersBulkUpdatable::class);
@@ -227,7 +224,8 @@ class CustomersController extends BaseController
         $this->getResponse()->setData(Json::serialize($result, $statusCode < 400 ? Utils::$Json : Utils::$JsonMinimal), $statusCode);
     }
     
-    function GET_byId(string $id) {
+    function GET_byId(string $id)
+    {
         $instance = Ioc::get(ICustomersBulkFetchable::class);
         $customers = $instance->getCustomers([$id]) ?? throw new NotFoundException();
         if (count($customers) < 1 || $customers[0] === null) {

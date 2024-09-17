@@ -3,7 +3,7 @@ namespace Idm\PiperLink\Contracts;
 
 use Idm\PiperLink\Models\Product;
 
-interface IProductsBulkCreateable
+interface IProductsBulkCreatable
 {
     /**
      * Create a bulk of new products.

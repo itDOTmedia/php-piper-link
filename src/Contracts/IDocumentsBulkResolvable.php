@@ -5,7 +5,7 @@ use Idm\PiperLink\Models\Document;
 
 /**
  * Try to find documents ids by given properties.
- * If the the id is already set, simply return the documen itself.
+ * If the the id is already set, simply return the document itself.
  * The document Id may only be set if the document can be clearly identified!
  */
 interface IDocumentsBulkResolvable

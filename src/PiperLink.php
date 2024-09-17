@@ -8,6 +8,7 @@ use Idm\PiperLink\Exceptions\NotImplementedException;
 use Idm\PiperLink\Http\Request;
 use Idm\PiperLink\Http\Response;
 use Idm\PiperLink\Tokens\TokenRepository;
+use Pyther\Ioc\Exceptions\ResolveException;
 use Pyther\Ioc\Ioc;
 
 class PiperLink
@@ -79,8 +80,12 @@ class PiperLink
      * @param string $path The requested url path relative to project home url.
      * @return boolean Returns true, if the route was a PiperLink route, false otherwise.
      */
-    public function route(?string $path = null) : bool {
+    public function route(?string $path = null) : bool
+    {
+        // Warning: passing NULL as path only works, if your project is not within a url sub directory.
+        // That is why this feature is not documented.
         $path ??= strtok($_SERVER["REQUEST_URI"], '?');
+        
         $path = ltrim($path, "/");
 
         if ($path == null || !str_starts_with($path, $this->router->root)) {
@@ -98,6 +103,8 @@ class PiperLink
             $this->response->setData(!empty($ex->getMessage()) ? ["message" => $ex->getMessage()] : null, 501, "JSON");
         } catch (NotFoundException) {
             $this->response->setData(null, 404);
+        } catch (ResolveException $ex) {
+            $this->response->setData(!empty($ex->getMessage()) ? ["message" => $ex->getMessage()] : null, 501, "JSON");
         } finally {
             $this->response->deliver();
         }

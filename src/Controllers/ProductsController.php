@@ -1,7 +1,7 @@
 <?php
 namespace Idm\PiperLink\Controllers;
 
-use Idm\PiperLink\Contracts\IProductsBulkCreateable;
+use Idm\PiperLink\Contracts\IProductsBulkCreatable;
 use Idm\PiperLink\Contracts\IProductsBulkDeletable;
 use Idm\PiperLink\Contracts\IProductsBulkFetchable;
 use Idm\PiperLink\Contracts\IProductsBulkResolvable;
@@ -73,8 +73,8 @@ class ProductsController extends BaseController
 
     function POST_bulk()
     {
-        /** @var IProductsBulkCreateable */
-        $instance = Ioc::get(IProductsBulkCreateable::class);
+        /** @var IProductsBulkCreatable */
+        $instance = Ioc::get(IProductsBulkCreatable::class);
         $result = [];
         $json = $this->getRequest()->getRawPayload();
 
