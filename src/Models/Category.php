@@ -4,7 +4,7 @@ namespace Idm\PiperLink\Models;
 /**
  * Model of a single (shop) category.
  */
-class Category
+class Category extends BaseModel
 {
     /**
      * The unique category id.

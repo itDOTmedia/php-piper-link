@@ -1,6 +1,6 @@
 <?php
 namespace Idm\PiperLink\Models;
 
-class OrderItem {
+class OrderItem extends BaseModel {
     // TODO:
 }

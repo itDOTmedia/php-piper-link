@@ -8,7 +8,7 @@ use Idm\PiperLink\Types\ReferenceType;
 /**
  * The model for a (order) document.
  */ 
-class Attachment
+class Attachment extends BaseModel
 {
     /**
      * The document id (leave empty for new uploads).
