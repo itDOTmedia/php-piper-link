@@ -73,7 +73,7 @@ class Document extends BaseModel
     
         /**
          * list of contacts.
-         * @var Idm\PiperLink\Models\Contact[]
+         * @var \Idm\PiperLink\Models\Contact[]
          */
         public ?array $contacts = null;
     
@@ -83,7 +83,7 @@ class Document extends BaseModel
     
         /**
          * list of document items.
-         * @var Idm\PiperLink\Models\DocumentItem[]
+         * @var \Idm\PiperLink\Models\DocumentItem[]
          */
         public ?array $items = null;
     
@@ -93,7 +93,7 @@ class Document extends BaseModel
     
         /**
          * list of notes.
-         * @var Idm\PiperLink\Models\Note[]
+         * @var \Idm\PiperLink\Models\Note[]
          */
         public ?array $notes = null;
     
