@@ -104,6 +104,7 @@ class CustomersController extends BaseController
         $result = [];
         $json = $this->getRequest()->getRawPayload();   
         $customers = Json::deserializeArrayOf($json, Customer::class, Utils::$Json);
+        
         foreach ($instance->updateCustomers($customers, []) as $item) {
             if (is_string($item)) {
                 $error = $item;

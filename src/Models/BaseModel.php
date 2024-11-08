@@ -3,16 +3,14 @@
 namespace Idm\PiperLink\Models;
 
 use ArrayAccess;
+use Idm\PiperLink\Traits\Customs;
+use Pyther\Json\Attributes\JsonComplete;
 
 abstract class BaseModel implements ArrayAccess
 {
-    #region customs
+    use Customs;
 
-    /**
-     *
-     * @var \Idm\PiperLink\Models\CustomData[]
-     */
-    public array $customs = [];
+    #region ArrayAccess
 
     public function offsetSet($offset, $value): void
     {
@@ -22,54 +20,30 @@ abstract class BaseModel implements ArrayAccess
         }
         // BaseModel[$key] = $value;
         else {
-            $this->customs[$offset] = $value;
+            $this->setCustomValue($offset, $value);
         }
     }
 
     public function offsetExists($key): bool
     {
-        return isset($this->customs[$key]);
+        return isset($this->parsedCustoms[$key]);
     }
 
     public function offsetUnset($key): void
     {
-        unset($this->customs[$key]);
+        $this->deleteCustom($key);
     }
 
     public function offsetGet($key): mixed
     {
-        return $this->customs[$key] ?? null;
-    }
-
-    /**
-     * Get custom data object by key and optional language.
-     *
-     * @param string $key The custom data key.
-     * @param string|null $lang The optional custom language selector.
-     * @return mixed Returns the custom data object if the key (and language) exists, null otherwise.
-     */
-    public function getCustom(string $key, ?string $lang = null): ?CustomData
-    {
-        foreach ($this->customs as $data) {
-            if ($data->key === $key && ($lang == null || $data->language == $lang)) {
-                return $data;
-            }
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Get custom value by key and optional language.
-     *
-     * @param string $key The custom data key.
-     * @param string|null $lang The optional custom language selector.
-     * @return mixed Returns the custom data value if the key (and language) exists, null otherwise.
-     */
-    public function getCustomValue(string $key, ?string $lang = null): mixed
-    {
-        return $this->getCustom($key, $lang)?->value ?? null;
+        return $this->getCustomValue($key);        
     }
 
     #endregion
+
+    #[JsonComplete()]
+    public function OnDeserializeComplete()
+    {
+        $this->parseCustoms();
+    }
 }

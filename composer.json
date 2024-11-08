@@ -17,6 +17,6 @@
     "minimum-stability": "dev",    
     "require": {
         "pyther/ioc": ">=0.1.1",
-        "pyther/json": ">=0.2.2"
+        "pyther/json": ">=0.2.3"
     }
 }
