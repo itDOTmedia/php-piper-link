@@ -89,7 +89,7 @@ class Contact extends BaseModel
      * The company name.
      * @var string|null
      */    
-    public ?string $Ccompany = null;
+    public ?string $company = null;
 
     /**
      * The additional address line.
