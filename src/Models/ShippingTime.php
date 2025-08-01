@@ -1,8 +1,9 @@
 <?php
+
 namespace Idm\PiperLink\Models;
 
 /**
- * Model of a single customer, employee or system note.
+ * Model of a single shipping time.
  */
 class ShippingTime
 {
